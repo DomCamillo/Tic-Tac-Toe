@@ -16,17 +16,17 @@ function render() {
     const content = document.getElementById("content");
     let tableHTML = "<table>";
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 3; i++) { // generiert ein 3x3 tr elemente 
         tableHTML += "<tr>";
         for (let j = 0; j < 3; j++) {
-            const index = i * 3 + j;
+            const index = i * 3 + j; // jeden td element wird ein index zugewissen 
             let symbol = '';
-            if (fields[index] === 'circle') {
+            if (fields[index] === 'circle') { // wenn das feld denn wert 'circle' bekommt wird ein kreis generiert 
                 symbol = generateCircleSVG(width, height);
             } else if (fields[index] === 'cross') {
                 symbol = generateXSVG(width, height);
             }
-            tableHTML += `<td onclick="placeSymbol(${index})">${symbol}</td>`;
+            tableHTML += `<td onclick="placeSymbol(${index})">${symbol}</td>`; // hier wird das entsprechende symbol in das geclickte platziert
         }
         tableHTML += "</tr>";
     }
@@ -36,7 +36,7 @@ function render() {
     content.innerHTML = tableHTML;
 }
 
-function generateCircleSVG(width, height) {
+function generateCircleSVG(width, height) { // eine function die einen kreis generriert 
     return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="${width / 2}" cy="${height / 2}" r="${(width - 10) / 2}" fill="transparent" stroke="#0b55b6" stroke-width="3">
                     <animate attributeName="r" from="0" to="${(width - 10) / 2}" dur="0.5s" fill="freeze" />
@@ -45,7 +45,7 @@ function generateCircleSVG(width, height) {
             </svg>`;
 }
 
-function generateXSVG(width, height) {
+function generateXSVG(width, height) { // eine function die eine X generriert 
     const strokeWidth = 3;
 
     return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
@@ -59,30 +59,33 @@ function generateXSVG(width, height) {
 }
 
 function placeSymbol(index) {
-    const td = event.target;
+    const td = event.target;// ist das HTML elemt auf das gecklickt wurde 
     if (!fields[index]) { // Nur wenn das Feld leer ist
-        const symbol = isCircleTurn ? generateCircleSVG(width, height) : generateXSVG(width, height);
-        td.innerHTML = symbol;
-        fields[index] = isCircleTurn ? 'circle' : 'cross';
-        isCircleTurn = !isCircleTurn; // Wechselt zwischen Kreis und Kreuz
+        const symbol = isCircleTurn ? generateCircleSVG(width, height) : generateXSVG(width, height);// Hier wird entschieden welches symbol generiert werden soll // iscircleTurn is eine boolean abfrage ist sie true wird ein O genereriert wenn fals ein X
+        td.innerHTML = symbol; // das entsprechende symbol wird in das gecklickte feld eingefügt
+        fields[index] = isCircleTurn ? 'circle' : 'cross'; // Der zustand des Fields array wird akutalisiert um zu speichern welches symbol plaziert wurde
+        isCircleTurn = !isCircleTurn; // Die variable wird inventiert um ein spiler wechsel zu ermöglichen 
 
-        const winner = checkWinner();
+        const winner = checkWinner(); // checkt welcher spieler gewonnen hat
         if (winner) {
             drawWinningLine(winner);
         }
     }
 }
 
-function checkWinner() {
+function checkWinner() { // Hier wird ein Array winPatterns definiert, das alle möglichen Gewinnmuster im Tic-Tac-Toe-Spiel enthält
     const winPatterns = [
         [0, 1, 2], [3, 4, 5], [6, 7, 8], // Horizontale
         [0, 3, 6], [1, 4, 7], [2, 5, 8], // Vertikale
         [0, 4, 8], [2, 4, 6]             // Diagonale
     ];
 
-    for (const pattern of winPatterns) {
-        const [a, b, c] = pattern;
-        if (fields[a] && fields[a] === fields[b] && fields[a] === fields[c]) {
+    for (const pattern of winPatterns) { //Diese Schleife durchläuft jedes Gewinnmuster im winPatterns-Array. Für jedes Muster werden die drei Indizes a, b und c extrahiert.
+        const [a, b, c] = pattern;// z.b pattern = [2,4,6]
+
+        // überprüft  ob das feld an postion a (2) nicht leer ist // überprüft das feld an position a das gleiche symbol wie auf postion b (4) enthält 
+        // überprpft ob das feld a das gleiche symbohl wie c enthält 
+        if (fields[a] && fields[a] === fields[b] && fields[a] === fields[c]) { 
             return pattern;
         }
     }
@@ -90,22 +93,24 @@ function checkWinner() {
     return null;
 }
 
-function drawWinningLine(pattern) {
+function drawWinningLine(pattern) { // die pattern varibale wird übergeben 
     const content = document.getElementById("content");
     const table = content.querySelector("table");
     const [a, b, c] = pattern;
 
-    const tdA = table.rows[Math.floor(a / 3)].cells[a % 3];
-    const tdB = table.rows[Math.floor(b / 3)].cells[b % 3];
+   // Diese Zeilen berechnen die Reihen- und Spaltenindizes der Zellen tdA, tdB und tdC basierend auf den Indizes a, b und c. 	
+    const tdA = table.rows[Math.floor(a / 3)].cells[a % 3]; //Math.floor(a / 3) gibt die Zeilenposition (0, 1 oder 2) von a.
+    const tdB = table.rows[Math.floor(b / 3)].cells[b % 3]; //a % 3 gibt die Spaltenposition (0, 1 oder 2) von a.
     const tdC = table.rows[Math.floor(c / 3)].cells[c % 3];
 
-    const rectA = tdA.getBoundingClientRect();
+    const rectA = tdA.getBoundingClientRect(); //getBoundingClientRect() gibt die Größe und Position des Elements relativ zum Ansichtsfenster zurück.
+
     const rectB = tdB.getBoundingClientRect();
     const rectC = tdC.getBoundingClientRect();
 
-    const x1 = rectA.left + rectA.width / 2;
-    const y1 = rectA.top + rectA.height / 2;
-    const x2 = rectC.left + rectC.width / 2;
+    const x1 = rectA.left + rectA.width / 2; // Berechnet die x- und y-Koordinaten der Mittelpunkte der Zellen tdA und tdC. 
+    const y1 = rectA.top + rectA.height / 2; // Diese werden verwendet, um die Start- und Endpunkte der Linie zu definieren.
+    const x2 = rectC.left + rectC.width / 2; 
     const y2 = rectC.top + rectC.height / 2;
 
     const lineSVG = `<svg width="100%" height="100%" style="position:absolute; top:0; left:0; pointer-events:none;">
@@ -114,15 +119,15 @@ function drawWinningLine(pattern) {
 
     content.insertAdjacentHTML('beforeend', lineSVG);
 }
-function resetGame() {
+function resetGame() { // alle felder werden zurückgesetzt 
     fields = [
         null, null, null,
         null, null, null,
         null, null, null
     ];
-    isCircleTurn = true;
+    isCircleTurn = true; // die variable wird wieder auf true gestzt 
     const content = document.getElementById("content");
-    content.innerHTML = '';
+    content.innerHTML = ''; // der HTML content wird geleert 
     render();
 }
 
